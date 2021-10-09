@@ -24,7 +24,7 @@ library(tidyverse)
 trash_wheel_df = readxl::read_excel(
   "./data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx",
   sheet = "Mr. Trash Wheel",
-  range = "A2:N408") %>% 
+  range = "A2:N534") %>% 
   janitor::clean_names() %>% 
   drop_na(dumpster) %>% 
   mutate(sports_balls = round(sports_balls))
@@ -36,23 +36,27 @@ pre_19 = readxl::read_excel(
   sheet = "2019 Precipitation",
   range = "A2:B14") %>% 
   janitor::clean_names() %>% 
+  drop_na(total) %>% 
   mutate(year = 2019) %>% 
   relocate(year)
-```
 
-``` r
 pre_18 = readxl::read_excel(
   "./data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx",
   sheet = "2018 Precipitation",
   range = "A2:B14") %>% 
   janitor::clean_names() %>% 
+  drop_na(total) %>% 
   mutate(year = 2018) %>% 
   relocate(year)
+
+pre_1819 = full_join(pre_18, pre_19) %>% 
+  mutate(month = month.name[month])
 ```
 
+    ## Joining, by = c("year", "month", "total")
+
 ``` r
-bind_rows(pre_18, pre_19) %>% 
-  mutate(month = month.name[month])
+pre_1819
 ```
 
     ## # A tibble: 24 × 3
@@ -83,6 +87,9 @@ median(pull(ball_19, sports_balls))
 
     ## [1] 9
 
-**short paragraph**
-
-## Problem 2
+\*\* The observation of trash\_wheel\_df is 345 with 14 variables, and
+we are specifically paying attention to variable *sports\_balls*. The
+observation of pre\_1819 is 24, and we are specifically looking at
+variable *total*. For available data, the total precipitation in 2018 is
+70.33, and the median number of sports balls in a dumpster in 2019 is 9.
+\*\*
