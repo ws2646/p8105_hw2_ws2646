@@ -257,3 +257,63 @@ names(final_df)
 **For final\_df, the dimension is (822 x 11), the range of year is
 (1947, 2015), and key variable is “president”, “close”,
 “unemployment”.**
+
+## Problem 3
+
+``` r
+popular_baby_names_df = 
+  read.csv("./data/Popular_Baby_Names (1).csv") %>% 
+  janitor::clean_names() %>% 
+  mutate(ethnicity = recode(ethnicity, "ASIAN AND PACI" = "ASIAN AND PACIFIC ISLANDER",
+                            "BLACK NON HISP" = "BLACK NON HISPANIC",
+                            "WHITE NON HISP" = "WHITE NON HISPANIC"),
+        child_s_first_name = str_to_sentence(child_s_first_name),
+        gender = str_to_sentence(gender),
+        ethnicity = str_to_sentence(ethnicity))
+
+nrow(popular_baby_names_df)
+```
+
+    ## [1] 19418
+
+``` r
+popular_baby_names_df = 
+  distinct(popular_baby_names_df, .keep_all= TRUE)
+
+nrow(popular_baby_names_df)
+```
+
+    ## [1] 12181
+
+``` r
+olivia_rank_df = 
+  popular_baby_names_df %>%
+  filter(child_s_first_name == "Olivia" & gender == "Female") %>%
+  select(-gender, -child_s_first_name, -count) %>% 
+  pivot_wider(
+    names_from = year_of_birth,
+    values_from = rank
+  )
+
+popular_male_name_df = 
+  popular_baby_names_df %>%
+  filter(gender == "Male" & rank == 1) %>% 
+  select(-gender, -rank, -count) %>% 
+  pivot_wider(
+    names_from = year_of_birth,
+    values_from = child_s_first_name
+  )
+```
+
+``` r
+m_nonhis_2016 = 
+  popular_baby_names_df %>% 
+  filter(gender == "Male" & ethnicity == "White non hispanic" & year_of_birth == 2016)
+
+ggplot(m_nonhis_2016, aes(x = rank, y = count)) +
+  labs(title = "correlation between names of white non-hispanic male children and rank",
+       x = "rank",
+       y = "# of children") + geom_point()
+```
+
+![](DS_HW2_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
