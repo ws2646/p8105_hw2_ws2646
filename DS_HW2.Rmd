@@ -18,6 +18,8 @@ trash_wheel_df = readxl::read_excel(
   janitor::clean_names() %>% 
   drop_na(dumpster) %>% 
   mutate(sports_balls = round(sports_balls))
+
+trash_wheel_df
 ```
 
 
@@ -71,6 +73,8 @@ pols_month_df = read.csv("./data/fivethirtyeight_datasets/pols-month.csv") %>%
     values_to = "number") %>% 
   filter(number != 0) %>% 
   select(-day, -number) 
+
+pols_month_df
 ```
 
 ```{r}
@@ -87,6 +91,8 @@ snp_after_2000 = filter(snp_df, year <= 20) %>%
   mutate(year = as.character(as.numeric(year) + 2000))
 
 snp_final = bind_rows(snp_before_2000, snp_after_2000)
+
+snp_final
 ```
 
 ```{r}
@@ -99,6 +105,8 @@ unemployment_df = read.csv("./data/fivethirtyeight_datasets/unemployment.csv") %
   mutate(month = month.name[match(month,month.abb)]) %>% 
   rename(year = Year) %>% 
   mutate(year = as.character(year))
+
+unemployment_df
 ```
 
 ```{r}
@@ -178,6 +186,10 @@ popular_male_name_df =
     names_from = year_of_birth,
     values_from = child_s_first_name
   )
+
+olivia_rank_df
+
+popular_male_name_df
 ```
 
 
