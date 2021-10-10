@@ -93,3 +93,167 @@ observation of pre\_1819 is 24, and we are specifically looking at
 variable *total*. For available data, the total precipitation in 2018 is
 70.33, and the median number of sports balls in a dumpster in 2019 is 9.
 \*\*
+
+## Problem 2
+
+``` r
+pols_month_df = read.csv("./data/fivethirtyeight_datasets/pols-month.csv") %>% 
+  janitor::clean_names() %>% 
+  separate(mon, into = c("year", "month", "day"), sep = "-") %>% 
+  mutate(month = as.numeric(month)) %>%
+  mutate(month = month.name[month]) %>% 
+  rename(republic = prez_gop, democratic = prez_dem) %>% 
+  pivot_longer(
+    c(republic, democratic),
+    names_to = "president",
+    values_to = "number") %>% 
+  filter(number != 0) %>% 
+  select(-day, -number) 
+```
+
+``` r
+snp_df = read.csv("./data/fivethirtyeight_datasets/snp.csv") %>% 
+  separate(date, into = c("month", "day", "year"), sep = "/") %>% 
+  relocate(year, month) %>% 
+  mutate(month = as.numeric(month)) %>% 
+  mutate(month = month.name[month]) %>% 
+  select(-day) 
+
+snp_before_2000 = filter(snp_df, year >= 20) %>% 
+  mutate(year = as.character(as.numeric(year) + 1900))
+snp_after_2000 = filter(snp_df, year <= 20) %>% 
+  mutate(year = as.character(as.numeric(year) + 2000))
+
+snp_final = bind_rows(snp_before_2000, snp_after_2000)
+```
+
+``` r
+unemployment_df = read.csv("./data/fivethirtyeight_datasets/unemployment.csv") %>% 
+  pivot_longer(
+    Jan:Dec,
+    names_to = "month",
+    values_to = "unemployment"
+  ) %>% 
+  mutate(month = month.name[match(month,month.abb)]) %>% 
+  rename(year = Year) %>% 
+  mutate(year = as.character(year))
+```
+
+``` r
+pols_snp = left_join(pols_month_df, snp_final) 
+```
+
+    ## Joining, by = c("year", "month")
+
+``` r
+final_df = left_join(pols_snp, unemployment_df)
+```
+
+    ## Joining, by = c("year", "month")
+
+``` r
+final_df
+```
+
+    ## # A tibble: 822 × 11
+    ##    year  month   gov_gop sen_gop rep_gop gov_dem sen_dem rep_dem president close
+    ##    <chr> <chr>     <int>   <int>   <int>   <int>   <int>   <int> <chr>     <dbl>
+    ##  1 1947  January      23      51     253      23      45     198 democrat…    NA
+    ##  2 1947  Februa…      23      51     253      23      45     198 democrat…    NA
+    ##  3 1947  March        23      51     253      23      45     198 democrat…    NA
+    ##  4 1947  April        23      51     253      23      45     198 democrat…    NA
+    ##  5 1947  May          23      51     253      23      45     198 democrat…    NA
+    ##  6 1947  June         23      51     253      23      45     198 democrat…    NA
+    ##  7 1947  July         23      51     253      23      45     198 democrat…    NA
+    ##  8 1947  August       23      51     253      23      45     198 democrat…    NA
+    ##  9 1947  Septem…      23      51     253      23      45     198 democrat…    NA
+    ## 10 1947  October      23      51     253      23      45     198 democrat…    NA
+    ## # … with 812 more rows, and 1 more variable: unemployment <dbl>
+
+``` r
+dim(pols_month_df)
+```
+
+    ## [1] 822   9
+
+``` r
+range(pull(pols_month_df, year))
+```
+
+    ## [1] "1947" "2015"
+
+``` r
+names(pols_month_df)
+```
+
+    ## [1] "year"      "month"     "gov_gop"   "sen_gop"   "rep_gop"   "gov_dem"  
+    ## [7] "sen_dem"   "rep_dem"   "president"
+
+``` r
+dim(snp_final)
+```
+
+    ## [1] 787   3
+
+``` r
+range(pull(snp_final, year))
+```
+
+    ## [1] "1950" "2015"
+
+``` r
+names(snp_final)
+```
+
+    ## [1] "year"  "month" "close"
+
+``` r
+dim(unemployment_df)
+```
+
+    ## [1] 816   3
+
+``` r
+range(pull(unemployment_df, year))
+```
+
+    ## [1] "1948" "2015"
+
+``` r
+names(unemployment_df)
+```
+
+    ## [1] "year"         "month"        "unemployment"
+
+``` r
+dim(final_df)
+```
+
+    ## [1] 822  11
+
+``` r
+range(pull(final_df, year))
+```
+
+    ## [1] "1947" "2015"
+
+``` r
+names(final_df)
+```
+
+    ##  [1] "year"         "month"        "gov_gop"      "sen_gop"      "rep_gop"     
+    ##  [6] "gov_dem"      "sen_dem"      "rep_dem"      "president"    "close"       
+    ## [11] "unemployment"
+
+**For pols\_month\_df, the dimension is (822 x 9), the range of year is
+(1947, 2015), and key variables is “president”.**
+
+**For snp\_final, the dimension is (787 x 3), the range of year is
+(1950, 2015), and key variable is “close”.**
+
+**For unemployment\_df, the dimension is (816 x 3), the range of year is
+(1948, 2015), and key variable is “unemployment”.**
+
+**For final\_df, the dimension is (822 x 11), the range of year is
+(1947, 2015), and key variable is “president”, “close”,
+“unemployment”.**

@@ -56,6 +56,87 @@ median(pull(ball_19, sports_balls))
 
 
 
+## Problem 2
+
+```{r}
+pols_month_df = read.csv("./data/fivethirtyeight_datasets/pols-month.csv") %>% 
+  janitor::clean_names() %>% 
+  separate(mon, into = c("year", "month", "day"), sep = "-") %>% 
+  mutate(month = as.numeric(month)) %>%
+  mutate(month = month.name[month]) %>% 
+  rename(republic = prez_gop, democratic = prez_dem) %>% 
+  pivot_longer(
+    c(republic, democratic),
+    names_to = "president",
+    values_to = "number") %>% 
+  filter(number != 0) %>% 
+  select(-day, -number) 
+```
+
+```{r}
+snp_df = read.csv("./data/fivethirtyeight_datasets/snp.csv") %>% 
+  separate(date, into = c("month", "day", "year"), sep = "/") %>% 
+  relocate(year, month) %>% 
+  mutate(month = as.numeric(month)) %>% 
+  mutate(month = month.name[month]) %>% 
+  select(-day) 
+
+snp_before_2000 = filter(snp_df, year >= 20) %>% 
+  mutate(year = as.character(as.numeric(year) + 1900))
+snp_after_2000 = filter(snp_df, year <= 20) %>% 
+  mutate(year = as.character(as.numeric(year) + 2000))
+
+snp_final = bind_rows(snp_before_2000, snp_after_2000)
+```
+
+```{r}
+unemployment_df = read.csv("./data/fivethirtyeight_datasets/unemployment.csv") %>% 
+  pivot_longer(
+    Jan:Dec,
+    names_to = "month",
+    values_to = "unemployment"
+  ) %>% 
+  mutate(month = month.name[match(month,month.abb)]) %>% 
+  rename(year = Year) %>% 
+  mutate(year = as.character(year))
+```
+
+```{r}
+pols_snp = left_join(pols_month_df, snp_final) 
+final_df = left_join(pols_snp, unemployment_df)
+
+final_df
+```
+
+```{r}
+dim(pols_month_df)
+range(pull(pols_month_df, year))
+names(pols_month_df)
+
+dim(snp_final)
+range(pull(snp_final, year))
+names(snp_final)
+
+dim(unemployment_df)
+range(pull(unemployment_df, year))
+names(unemployment_df)
+
+dim(final_df)
+range(pull(final_df, year))
+names(final_df)
+```
+
+**For pols_month_df, the dimension is (822 x 9), the range of year is (1947, 2015), and key variables is "president".**
+
+**For snp_final, the dimension is (787 x 3), the range of year is (1950, 2015), and key variable is "close".**
+
+**For unemployment_df, the dimension is (816 x 3), the range of year is (1948, 2015), and key variable is "unemployment".**
+
+**For final_df, the dimension is (822 x 11), the range of year is (1947, 2015), and key variable is "president", "close", "unemployment".**
+
+
+
+
 
 
 
